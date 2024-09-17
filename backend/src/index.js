@@ -3,15 +3,20 @@ import cookieParser from 'cookie-parser'
 
 const app = express()
 app.use(express.json())
-app.use(cookieParser())
+app.use(cookieParser('secretKey')) // add a sing to analyze cookies
 
 app.get('/', (req, res) => {
-    res.cookie('nameCookie', 'valueCookie')
+    res.cookie('nameCookie', 'valueCookie', {signed:true, maxAge: 5000})
     res.send('Cookie created')
 })
 
 app.get('/cookie', (req, res) => {
-    res.send('Cookie: ' + req.cookies.nameCookie)
+    const signedCookie = req.signedCookies.nameCookie
+    if (signedCookie) {
+        res.send('Cookie: ' + signedCookie)
+    } else {
+        res.send('Invalid cookie')
+    }
 })
 
 app.get('/deleteCookie', (req, res) => {
